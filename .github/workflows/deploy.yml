@@ -1,0 +1,49 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: List contents of workspace for debugging
+        run: ls -la
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Deploy the script to Docker registry
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/reactbot .
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_KEY }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/reactbot
+      - name: SSH into VM and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            # Define variables
+            DOCKER_CONTAINER_NAME="reactbot"
+
+            # Login to the docker repo
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_KEY }}
+            
+            # Stop and remove existing container
+            docker stop $DOCKER_CONTAINER_NAME && docker rm $DOCKER_CONTAINER_NAME || true
+            
+            # Pull the latest Docker image from the registry
+            docker pull ${{ secrets.DOCKER_USERNAME }}/reactbot
+            
+            # Run the Docker container
+            docker run -d \
+              --name $DOCKER_CONTAINER_NAME \
+              -v /opt/reactbot:/usr/src/app/Persist \
+              -e NODE_ENV=production \
+              -e DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }} \
+              -e DISCORD_CLIENT_ID=${{ secrets.DISCORD_CLIENT_ID }} \
+              ${{ secrets.DOCKER_USERNAME }}/reactbot
