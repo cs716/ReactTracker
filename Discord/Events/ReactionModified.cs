@@ -95,6 +95,9 @@ public class ReactionModified
             return;
         }
 
+        if (msg.Author.IsBot || msg.Author.IsWebhook)
+            return;
+
         if ( msg.Channel is not IGuildChannel guildChannel )
             return;
 
@@ -138,6 +141,9 @@ public class ReactionModified
             _logger.LogWarning( "Message not found" );
             return;
         }
+
+        if (msg.Author.IsBot || msg.Author.IsWebhook)
+            return;
 
         if ( msg.Channel is not IGuildChannel guildChannel )
             return;
