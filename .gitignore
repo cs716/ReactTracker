@@ -399,3 +399,6 @@ FodyWeavers.xsd
 
 # Launch settings used for dev only
 Properties/launchSettings.json
+
+# Don't send db stuff
+*.db*
