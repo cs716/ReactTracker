@@ -95,7 +95,13 @@ public class ReactionModified
             return;
         }
 
-        if (msg.Author.IsBot || msg.Author.IsWebhook)
+        if (msg.Author.IsBot || msg.Author.IsWebhook) // Ignore bot reactions
+            return;
+
+        if (reaction.User.IsSpecified && reaction.User.Value.IsBot) // Ignore bot reactions
+            return;
+
+        if (msg.Author.Id == reaction.UserId) // Ignore self reactions
             return;
 
         if ( msg.Channel is not IGuildChannel guildChannel )
@@ -142,7 +148,13 @@ public class ReactionModified
             return;
         }
 
-        if (msg.Author.IsBot || msg.Author.IsWebhook)
+        if (msg.Author.IsBot || msg.Author.IsWebhook) // Ignore bot reactions
+            return;
+
+        if (reaction.User.IsSpecified && reaction.User.Value.IsBot) // Ignore bot reactions
+            return;
+
+        if (msg.Author.Id == reaction.UserId) // Ignore self reactions
             return;
 
         if ( msg.Channel is not IGuildChannel guildChannel )
